@@ -12,7 +12,7 @@ class ApplicationTest {
         String result = Application.getMessage();
 
         assertEquals(
-                "Hello from  CI/CD!",
+                "Hello from Jenkins CI/CD!",
                 result
         );
     }

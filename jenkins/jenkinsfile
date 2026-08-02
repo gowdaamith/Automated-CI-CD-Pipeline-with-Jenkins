@@ -36,7 +36,7 @@ pipeline{
              steps{
                  sh '''
                    cd application
-                   mvn package -dskipTests
+                   mvn package -DskipTests
                  ''' 
              }
          }

@@ -7,7 +7,7 @@ pipeline{
             }
         }
         stage('Build'){
-            step{
+            steps{
                 sh '''
                     cd application
                     mvn clean package
@@ -15,7 +15,7 @@ pipeline{
             }
         }
         stage('Test'){
-            step{
+            steps{
                 sh '''
                     cd application
                     mvn test

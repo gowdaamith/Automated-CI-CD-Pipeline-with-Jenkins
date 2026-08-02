@@ -6,11 +6,11 @@ pipeline{
                 checkout scm
             }
         }
-        stage('Build'){
+        stage('compile'){
             steps{
                 sh '''
                     cd application
-                    mvn clean package
+                    mvn clean compile
                 '''
             }
         }
@@ -22,6 +22,24 @@ pipeline{
                 '''
             }
         }
+        stage('Sonarqube Analysis'){
+            steps{
+                withSonarQubeEnv('SonarQube'){
+                    sh '''
+                        cd application
+                        mvn sonar:sonar
+                    '''
+                }
+            }
+         }
+         stage('Package'){
+             steps{
+                 sh '''
+                   cd application
+                   mvn package -dskipTests
+                 ''' 
+             }
+         }
     }
     post{ 
         success{

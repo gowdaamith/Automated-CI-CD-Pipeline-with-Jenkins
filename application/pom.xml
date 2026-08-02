@@ -13,7 +13,9 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
 
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<sonar.projectKey>automated-cicd-pipeline</sonar.projectKey>
+        <sonar.projectName>automated-cicd-pipeline</sonar.projectName>
     </properties>
 
     <dependencies>

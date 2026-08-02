@@ -1,0 +1,38 @@
+pipeline{
+    agent any
+    stages{
+        stage('checkout'){
+            steps{
+                checkout scm
+            }
+        }
+        stage('Build'){
+            step{
+                sh '''
+                    cd application
+                    mvn clean package
+                '''
+            }
+        }
+        stage('Test'){
+            step{
+                sh '''
+                    cd application
+                    mvn test
+                '''
+            }
+        }
+    }
+    post{ 
+        success{
+            echo " ci pipeline completed successfully "
+        }
+        failure{
+            echo " ci pipeline failed"
+        }
+        always{
+            echo " Pipeline execution completed"
+        }
+    }
+}
+

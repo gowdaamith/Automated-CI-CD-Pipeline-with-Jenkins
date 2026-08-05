@@ -17,7 +17,16 @@
 	<sonar.projectKey>automated-cicd-pipeline</sonar.projectKey>
         <sonar.projectName>automated-cicd-pipeline</sonar.projectName>
     </properties>
-
+    <distributionManagement>
+		<repository>
+			<id>maven-release</id>
+			<url>http://localhost:8081/repository/maven-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven-snapshots</id>
+			<url>http://localhost:8081/repository/maven-snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
     <dependencies>
 
         <!-- JUnit 5 -->

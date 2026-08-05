@@ -46,8 +46,19 @@ pipeline{
                      waitForQualityGate abortPipeline: true
                  }
              }
+
          }
-    }
+         stage("publish to Nexus"){
+             steps{
+                 dir('application'){
+                     withMaven(globalMavenSettingsConfig: 'settings.xml', traceability: true) {
+                         sh'mvn deploy'
+
+                     }    
+                 }
+             }              
+              
+         }
     post{ 
         success{
             echo " ci pipeline completed successfully "

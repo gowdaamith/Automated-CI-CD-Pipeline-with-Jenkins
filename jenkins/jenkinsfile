@@ -1,74 +1,78 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage('checkout'){
-            steps{
+
+    stages {
+
+        stage('Checkout') {
+            steps {
                 checkout scm
             }
         }
-        stage('compile'){
-            steps{
-                sh '''
-                    cd application
-                    mvn clean compile
-                '''
-            }
-        }
-        stage('Test'){
-            steps{
-                sh '''
-                    cd application
-                    mvn test
-                '''
-            }
-        }
-        stage('Sonarqube Analysis'){
-            steps{
-                withSonarQubeEnv('SonarQube'){
-                    sh '''
-                        cd application
-                        mvn sonar:sonar
-                    '''
+
+        stage('Compile') {
+            steps {
+                dir('application') {
+                    sh 'mvn clean compile'
                 }
             }
-         }
-         stage('Package'){
-             steps{
-                 sh '''
-                   cd application
-                   mvn package -DskipTests
-                 ''' 
-             }
-         }
-         stage('Quality Gate'){
-             steps{
-                 timeout(time: 5,unit: 'MINUTES'){
-                     waitForQualityGate abortPipeline: true
-                 }
-             }
-
-         }
-         stage("publish to Nexus"){
-             steps{
-                 dir('application'){
-                     withMaven(globalMavenSettingsConfig: 'settings.xml', traceability: true) {
-                         sh'mvn deploy'
-
-                     }    
-                 }
-             }              
-              
-         }
-    post{ 
-        success{
-            echo " ci pipeline completed successfully "
         }
-        failure{
-            echo " ci pipeline failed"
+
+        stage('Test') {
+            steps {
+                dir('application') {
+                    sh 'mvn test'
+                }
+            }
         }
-        always{
-            echo " Pipeline execution completed"
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('application') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'mvn sonar:sonar'
+                    }
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                dir('application') {
+                    sh 'mvn package -DskipTests'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Publish to Nexus') {
+            steps {
+                dir('application') {
+                    withMaven(globalMavenSettingsConfig: 'settings.xml', traceability: true) {
+                        sh 'mvn deploy'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'CI pipeline completed successfully'
+        }
+
+        failure {
+            echo 'CI pipeline failed'
+        }
+
+        always {
+            echo 'Pipeline execution completed'
         }
     }
 }
-

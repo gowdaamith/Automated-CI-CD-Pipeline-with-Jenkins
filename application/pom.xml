@@ -19,7 +19,7 @@
     </properties>
     <distributionManagement>
 		<repository>
-			<id>maven-release</id>
+			<id>maven-releases</id>
 			<url>http://localhost:8081/repository/maven-releases/</url>
 		</repository>
 		<snapshotRepository>

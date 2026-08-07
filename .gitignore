@@ -1,17 +1,143 @@
+# ================================
 # Maven
-application/target/
+# ================================
 
-# IDE
-.idea/
-.vscode/
-*.iml
+# Maven build output
+target/
 
+# Maven local repository
+.m2/
+
+# Maven wrapper generated files
+!.mvn/wrapper/maven-wrapper.jar
+
+
+# ================================
 # Java
+# ================================
+
+# Compiled Java classes
 *.class
 
-# Logs
-*.log
+# Java archives
+*.jar
+*.war
+*.ear
 
-# OS
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+
+# ================================
+# IDEs
+# ================================
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+.nb-gradle/
+
+
+# ================================
+# Operating System
+# ================================
+
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+
+# ================================
+# Logs
+# ================================
+
+*.log
+logs/
+
+
+# ================================
+# Environment / Secrets
+# ================================
+
+.env
+.env.*
+!.env.example
+
+# Local configuration containing secrets
+application-local.properties
+application-local.yml
+application-local.yaml
+
+# Private keys / certificates
+*.pem
+*.key
+*.p12
+*.jks
+
+
+# ================================
+# Jenkins
+# ================================
+
+# Jenkins workspace artifacts
+jenkins_home/
+
+# Jenkins temporary files
+*.tmp
+
+
+# ================================
+# SonarQube
+# ================================
+
+.sonar/
+
+
+# ================================
+# Docker
+# ================================
+
+# Docker override files
+docker-compose.override.yml
+
+# Local Docker environment files
+docker/.env
+
+
+# ================================
+# Temporary files
+# ================================
+
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+```
+

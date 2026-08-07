@@ -54,50 +54,56 @@ pipeline {
         stage('Publish to Nexus') {
             steps {
                 dir('application') {
-                    withMaven(globalMavenSettingsConfig: 'settings.xml', traceability: true) {
+                    withMaven(
+                        globalMavenSettingsConfig: 'settings.xml',
+                        traceability: true
+                    ) {
                         sh 'mvn deploy'
                     }
                 }
             }
         }
-        stage('Build the docker image'){
-            steps{
-                dir('application'){
+
+        stage('Build the Docker Image') {
+            steps {
+                dir('application') {
                     withCredentials([
                         usernamePassword(
                             credentialsId: 'docker-cred',
                             usernameVariable: 'DOCKER_USERNAME',
                             passwordVariable: 'DOCKER_PASSWORD'
                         )
-                    ]){
+                    ]) {
                         sh '''
                             docker build \
                                 -t "$DOCKER_USERNAME/cicd-demo:${BUILD_NUMBER}" .
                         '''
-                       }
+                    }
+                }
             }
-         }   
-       
         }
-        stage('DOCKERHUB PUSH'{
-            steps{
+
+        stage('DockerHub Push') {
+            steps {
                 withCredentials([
                     usernamePassword(
-                    	credentialsId: 'docker-cred',
-                    	usernameVariable: 'DOCKER_USERNAME',
-			passwordVariable: 'DOCKER_PASSWORD'
-                ]){
-                  sh'''
-                    echo "$DOCKER_PASSWORD" |\
-                    docker login \
-                    	-u "$DOCKER_USERNAME"\
-                        -- password-stdin
-                    docker push \
-                    	"$DOCKER_USERNAME/cicd-demo:${BUILD_NUMBER}"
-                  '''
-                 }
+                        credentialsId: 'docker-cred',
+                        usernameVariable: 'DOCKER_USERNAME',
+                        passwordVariable: 'DOCKER_PASSWORD'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASSWORD" | \
+                        docker login \
+                            -u "$DOCKER_USERNAME" \
+                            --password-stdin
+
+                        docker push \
+                            "$DOCKER_USERNAME/cicd-demo:${BUILD_NUMBER}"
+                    '''
+                }
             }
-       }
+        }
     }
 
     post {

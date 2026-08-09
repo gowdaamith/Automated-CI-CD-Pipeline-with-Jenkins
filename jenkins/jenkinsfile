@@ -1,15 +1,22 @@
 pipeline {
+
     agent any
+
+    environment {
+        DOCKER_IMAGE = 'gowdaamith/cicd-demo'
+        DOCKER_CREDENTIALS = 'docker-cred'
+        EC2_SSH_CREDENTIALS = 'staging-ec2-ssh'
+    }
 
     stages {
 
-        stage('Checkout') {
+        stage('CHECKOUT') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Compile') {
+        stage('COMPILE') {
             steps {
                 dir('application') {
                     sh 'mvn clean compile'
@@ -17,7 +24,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Unit test') {
             steps {
                 dir('application') {
                     sh 'mvn test'
@@ -35,18 +42,20 @@ pipeline {
             }
         }
 
-        stage('Package') {
+        stage('Quality Gate') {
             steps {
-                dir('application') {
-                    sh 'mvn package -DskipTests'
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate(
+                        abortPipeline: true
+                    )
                 }
             }
         }
 
-        stage('Quality Gate') {
+        stage('Package') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                dir('application') {
+                    sh 'mvn package -DskipTests'
                 }
             }
         }
@@ -64,59 +73,99 @@ pipeline {
             }
         }
 
-        stage('Build the Docker Image') {
+        stage('Docker Build') {
             steps {
                 dir('application') {
-                    withCredentials([
-                        usernamePassword(
-                            credentialsId: 'docker-cred',
-                            usernameVariable: 'DOCKER_USERNAME',
-                            passwordVariable: 'DOCKER_PASSWORD'
-                        )
-                    ]) {
-                        sh '''
-                            docker build \
-                                -t "$DOCKER_USERNAME/cicd-demo:${BUILD_NUMBER}" .
-                        '''
-                    }
+                    sh '''
+                        docker build -t "$DOCKER_IMAGE:${BUILD_NUMBER}" .
+                    '''
                 }
             }
         }
 
-        stage('DockerHub Push') {
+        stage('Docker Push') {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'docker-cred',
+                        credentialsId: "${DOCKER_CREDENTIALS}",
                         usernameVariable: 'DOCKER_USERNAME',
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
                 ]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | \
-                        docker login \
-                            -u "$DOCKER_USERNAME" \
+                            docker login \
+                            --username "$DOCKER_USERNAME" \
                             --password-stdin
 
-                        docker push \
-                            "$DOCKER_USERNAME/cicd-demo:${BUILD_NUMBER}"
+                        docker push "$DOCKER_IMAGE:${BUILD_NUMBER}"
+
+                        docker logout
                     '''
                 }
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                sshagent(["${EC2_SSH_CREDENTIALS}"]) {
+                    sh '''
+                        ansible-playbook \
+                            -i ansible/inventory.ini \
+                            ansible/playbook.yml \
+                            --extra-vars "docker_image=${DOCKER_IMAGE}:${BUILD_NUMBER}"
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sshagent(["${EC2_SSH_CREDENTIALS}"]) {
+                    sh '''
+                        ansible-playbook \
+                            -i ansible/inventory.ini \
+                            ansible/health-check.yml
+                    '''
+                }
+            }
+        }
+
+        stage('Production Approval') {
+            steps {
+                input(
+                    message: """Staging deployment completed successfully.
+
+Health check passed.
+
+Docker image:
+${DOCKER_IMAGE}:${BUILD_NUMBER}
+
+Do you want to deploy this version to Production?""",
+                    ok: 'Approve Production Deployment'
+                )
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                echo 'Deploying to Production'
             }
         }
     }
 
     post {
         success {
-            echo 'CI pipeline completed successfully'
+            echo ' PIPELINE SUCCESS '
         }
 
         failure {
-            echo 'CI pipeline failed'
+            echo ' PIPELINE FAILED '
         }
 
-        always {
-            echo 'Pipeline execution completed'
+        aborted {
+            echo ' PIPELINE ABORTED'
         }
     }
 }
+

@@ -118,7 +118,7 @@ pipeline {
                     sh '''
                         ansible-playbook \
                             -i application/ansible/inventory.ini \
-                            application/ansible/health-check.yml
+                            application/ansible/health-check.sh
                     '''
                 }
             }

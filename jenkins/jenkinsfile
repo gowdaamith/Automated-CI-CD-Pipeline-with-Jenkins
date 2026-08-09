@@ -46,8 +46,8 @@ pipeline {
             steps {
                 pass
                 
-                }
             }
+           
         }
 
         stage('Package') {

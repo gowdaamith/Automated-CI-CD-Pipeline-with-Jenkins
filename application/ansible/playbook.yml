@@ -23,6 +23,11 @@
           - python3-docker
         state: present
 
+    - name: Install Docker SDK for Python
+      ansible.builtin.pip:
+        name: docker
+        executable: pip3
+
     - name: Start and enable Docker
       ansible.builtin.service:
         name: docker

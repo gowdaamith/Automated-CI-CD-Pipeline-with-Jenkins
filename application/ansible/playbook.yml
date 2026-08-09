@@ -1,4 +1,4 @@
-ww---
+---
 - name: Prepare the staging server and deploy application
   hosts: staging
   become: true
@@ -9,13 +9,12 @@ ww---
     docker_image: "{{ docker_image_repo }}:{{ build_number }}"
 
   tasks:
-
-    - name: Install and upgrade the packages
+    - name: Update apt cache
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
 
-    - name: Install the required packages
+    - name: Install required packages
       ansible.builtin.apt:
         name:
           - docker.io
@@ -35,12 +34,12 @@ ww---
         groups: docker
         append: true
 
-    - name: Pull the Docker image
+    - name: Pull Docker image
       community.docker.docker_image:
         name: "{{ docker_image }}"
         source: pull
 
-    - name: Remove the old container
+    - name: Remove old container
       community.docker.docker_container:
         name: cicd-demo
         state: absent
@@ -52,58 +51,4 @@ ww---
         state: started
         restart_policy: unless-stopped
         ports:
-          - "8080:8080"---
-- name: Prepare the staging server and deploy application
-  hosts: staging
-  become: true
-
-  vars:
-    docker_image_repo: "gowdaamith/cicd-demo"
-    build_number: "{{ build_docker }}"
-    docker_image: "{{ docker_image_repo }}:{{ build_number }}"
-
-  tasks:
-
-    - name: Install and upgrade the packages
-      ansible.builtin.apt:
-        update_cache: true
-        cache_valid_time: 3600
-
-    - name: Install the required packages
-      ansible.builtin.apt:
-        name:
-          - docker.io
-          - python3
-          - python3-pip
-        state: present
-
-    - name: Start and enable Docker
-      ansible.builtin.service:
-        name: docker
-        state: started
-        enabled: true
-
-    - name: Add ubuntu user to docker group
-      ansible.builtin.user:
-        name: ubuntu
-        groups: docker
-        append: true
-
-    - name: Pull the Docker image
-      community.docker.docker_image:
-        name: "{{ docker_image }}"
-        source: pull
-
-    - name: Remove the old container
-      community.docker.docker_container:
-        name: cicd-demo
-        state: absent
-
-    - name: Start application container
-      community.docker.docker_container:
-        name: cicd-demo
-        image: "{{ docker_image }}"
-        state: started
-        restart_policy: unless-stopped
-        ports:
-          - "8080:8080"
+          - "8080:8082"

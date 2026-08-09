@@ -19,7 +19,6 @@
         name:
           - docker.io
           - python3
-          - python3-docker
         state: present
 
     - name: Start and enable Docker
@@ -35,20 +34,19 @@
         append: true
 
     - name: Pull Docker image
-      community.docker.docker_image:
-        name: "{{ docker_image }}"
-        source: pull
+      ansible.builtin.command: docker pull {{ docker_image }}
+      changed_when: true
 
     - name: Remove old container
-      community.docker.docker_container:
-        name: cicd-demo
-        state: absent
+      ansible.builtin.command: docker rm -f cicd-demo
+      ignore_errors: true
+      changed_when: true
 
     - name: Start application container
-      community.docker.docker_container:
-        name: cicd-demo
-        image: "{{ docker_image }}"
-        state: started
-        restart_policy: unless-stopped
-        ports:
-          - "8082:8082"
+      ansible.builtin.command: >
+        docker run -d
+        --name cicd-demo
+        --restart unless-stopped
+        -p 8082:8082
+        {{ docker_image }}
+      changed_when: true
